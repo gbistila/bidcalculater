@@ -1,75 +1,128 @@
-function round(value) {
-  return Math.round(value * 100) / 100;
-}
+// ---------- Money helpers (do all $ math in cents) ----------
+const toCents = (value) => Math.round(value * 100);        // dollars -> cents (nearest cent)
+const centsMul = (cents, factor) => Math.round(cents * factor); // cents * factor -> cents (nearest cent)
+const money = (cents) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(cents / 100);
 
+// ---------- Core calculation ----------
 function calculateBid(sf, thicknessInches) {
   const markup = 1.43;
 
-  // Base volume
+  // constants
+  const laborRate = 48;                 // $/hr
+  const baseMaterialRate = 35;          // $/CY
+  const compactorRentalC = toCents(250); // $250 flat, in cents
+  const concreteMaterialRate = 225;     // $/CY
+  const flatworkRate = 1.75;            // $/SF
+  const flatworkMin = 1500;             // $
+  const roadCompaction = 1.20;
+  const concreteWaste = 1.20;
+
+  // cubic yards (design)
   const cy = (sf * thicknessInches) / 324;
 
   // --- Soil Removal ---
   const soilLaborHours = cy * 0.6;
-  const soilCost = round(soilLaborHours * 48);
-  const soilPrice = round(soilCost * markup);
+  const soilCostC = toCents(soilLaborHours * laborRate);
+  const soilPriceC = centsMul(soilCostC, markup);
 
   // --- Road Base ---
-  const roadLooseCY = cy * 1.2;
-  const roadMaterialCost = round(roadLooseCY * 35);
-  const roadLaborCost = round(roadLooseCY * 48);
-  const compactorRental = 250;
-  const roadCost = round(roadMaterialCost + roadLaborCost + compactorRental);
-  const roadPrice = round(roadCost * markup);
+  const baseDesignCY = cy;
+  const baseLooseCY = baseDesignCY * roadCompaction;
+  const baseMaterialCostC = toCents(baseLooseCY * baseMaterialRate);
+  const baseLaborHours = baseLooseCY * 1.0;
+  const baseLaborCostC = toCents(baseLaborHours * laborRate);
+  const baseCostC = baseMaterialCostC + baseLaborCostC + compactorRentalC;
+  const basePriceC = centsMul(baseCostC, markup);
 
   // --- Concrete ---
-  const concreteOrderedCY = cy * 1.2;
-  const concreteMaterialCost = round(concreteOrderedCY * 225);
-  const concreteFlatworkCost = round(Math.max(1500, sf * 1.75));
-  const concreteCost = round(concreteMaterialCost + concreteFlatworkCost);
-  const concretePrice = round(concreteCost * markup);
+  const creteDesignCY = cy;
+  const creteOrderedCY = creteDesignCY * concreteWaste;
+  const creteMaterialCostC = toCents(creteOrderedCY * concreteMaterialRate);
+  const creteFlatworkC = Math.max(toCents(flatworkMin), toCents(sf * flatworkRate));
+  const creteCostC = creteMaterialCostC + creteFlatworkC;
+  const cretePriceC = centsMul(creteCostC, markup);
 
   // --- Totals ---
-  const totalCost = round(soilCost + roadCost + concreteCost);
-  const totalPrice = round(soilPrice + roadPrice + concretePrice);
+  const totalCostC = soilCostC + baseCostC + creteCostC;
+  const totalPriceC = soilPriceC + basePriceC + cretePriceC;
 
   return {
     input: { squareFeet: sf, thickness: thicknessInches },
     soil: {
-      cubicYards: round(cy),
-      laborHours: round(soilLaborHours),
-      cost: soilCost,
-      price: soilPrice
+      cubicYards: cy,
+      laborHours: soilLaborHours,
+      costC: soilCostC,
+      priceC: soilPriceC
     },
     roadBase: {
-      designCY: round(cy),
-      looseCY: round(roadLooseCY),
-      materialCost: roadMaterialCost,
-      laborCost: roadLaborCost,
-      compactorRental,
-      cost: roadCost,
-      price: roadPrice
+      designCY: baseDesignCY,
+      looseCY: baseLooseCY,
+      materialCostC: baseMaterialCostC,
+      laborHours: baseLaborHours,
+      laborCostC: baseLaborCostC,
+      compactorRentalC,
+      costC: baseCostC,
+      priceC: basePriceC
     },
     concrete: {
-      orderedCY: round(concreteOrderedCY),
-      materialCost: concreteMaterialCost,
-      flatworkCost: concreteFlatworkCost,
-      cost: concreteCost,
-      price: concretePrice
+      designCY: creteDesignCY,
+      orderedCY: creteOrderedCY,
+      materialCostC: creteMaterialCostC,
+      flatworkC: creteFlatworkC,
+      costC: creteCostC,
+      priceC: cretePriceC
     },
     totals: {
-      cost: totalCost,
-      price: totalPrice
+      costC: totalCostC,
+      priceC: totalPriceC
     }
   };
 }
 
+// ---------- UI wiring ----------
 function runCalc() {
   const sf = parseFloat(document.getElementById('sfInput').value);
   const thickness = parseFloat(document.getElementById('thicknessInput').value);
-  if (isNaN(sf) || isNaN(thickness)) {
-    document.getElementById('output').textContent = "Please enter valid numbers.";
+
+  const cards = document.getElementById('cards');
+  if (isNaN(sf) || isNaN(thickness) || sf <= 0 || thickness <= 0) {
+    cards.style.display = 'none';
     return;
   }
-  const result = calculateBid(sf, thickness);
-  document.getElementById('output').textContent = JSON.stringify(result, null, 2);
+
+  const r = calculateBid(sf, thickness);
+  cards.style.display = 'grid';
+
+  // Soil
+  document.getElementById('soilCY').textContent = r.soil.cubicYards.toFixed(2);
+  document.getElementById('soilHrs').textContent = r.soil.laborHours.toFixed(2);
+  document.getElementById('soilCost').textContent = money(r.soil.costC);
+  document.getElementById('soilPrice').textContent = money(r.soil.priceC);
+
+  // Road Base
+  document.getElementById('baseDesignCY').textContent = r.roadBase.designCY.toFixed(2);
+  document.getElementById('baseLooseCY').textContent = r.roadBase.looseCY.toFixed(2);
+  document.getElementById('baseMat').textContent = money(r.roadBase.materialCostC);
+  document.getElementById('baseHrs').textContent = r.roadBase.laborHours.toFixed(2);
+  document.getElementById('baseLabor').textContent = money(r.roadBase.laborCostC);
+  document.getElementById('baseComp').textContent = money(r.roadBase.compactorRentalC);
+  document.getElementById('baseCost').textContent = money(r.roadBase.costC);
+  document.getElementById('basePrice').textContent = money(r.roadBase.priceC);
+
+  // Concrete
+  document.getElementById('creteDesignCY').textContent = r.concrete.designCY.toFixed(2);
+  document.getElementById('creteOrderedCY').textContent = r.concrete.orderedCY.toFixed(2);
+  document.getElementById('creteMat').textContent = money(r.concrete.materialCostC);
+  document.getElementById('creteFlat').textContent = money(r.concrete.flatworkC);
+  document.getElementById('creteCost').textContent = money(r.concrete.costC);
+  document.getElementById('cretePrice').textContent = money(r.concrete.priceC);
+
+  // Totals
+  document.getElementById('totCost').textContent = money(r.totals.costC);
+  document.getElementById('totPrice').textContent = money(r.totals.priceC);
+
+  // Optional debug (remove if not needed)
+  document.getElementById('debug').textContent =
+    `Inputs: ${r.input.squareFeet} SF @ ${r.input.thickness}" | CY: ${(r.soil.cubicYards).toFixed(4)}`;
 }
