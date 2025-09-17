@@ -97,6 +97,15 @@
       </div>
     </section>
 
+    <div class="actions">
+  <button id="calcBtn" type="button">Calculate</button>
+</div>
+
+<label style="margin-top: 12px; display: block;">
+  <input type="checkbox" id="handoffToggle" />
+  Include Operational Handoff
+</label>
+
     <section id="results" class="grid hidden" aria-live="polite">
       <div class="card">
         <h3>Soil removal</h3>
@@ -134,9 +143,15 @@
         <div class="row"><div class="label strong">Total price</div><div class="value strong" id="totPrice"></div></div>
       </div>
     </section>
+
+    <section id="handoff" class="card hidden" aria-live="polite">
+  <!-- This will be filled by JS -->
+</section>
+    
   </main>
 
   <script src="script.js"></script>
 </body>
 </html>
+
 
