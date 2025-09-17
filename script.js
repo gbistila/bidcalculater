@@ -2,7 +2,11 @@
 const toCents = (value) => Math.round(Number(value) * 100);
 const centsMul = (cents, factor) => Math.round(cents * Number(factor));
 const money = (cents) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(cents / 100);
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+  }).format(cents / 100);
 
 // ---- Core calculation ----
 function calculateBid(sf, thicknessInches) {
@@ -104,7 +108,7 @@ function calcAndRender() {
   if (!isFinite(sf) || !isFinite(thickness) || sf <= 0 || thickness <= 0) {
     resultsEl.classList.add('hidden');
     return;
-    }
+  }
   const result = calculateBid(sf, thickness);
   resultsEl.classList.remove('hidden');
   render(result);
@@ -114,5 +118,3 @@ function calcAndRender() {
 document.getElementById('calcBtn').addEventListener('click', calcAndRender);
 document.getElementById('sfInput').addEventListener('input', calcAndRender);
 document.getElementById('thicknessInput').addEventListener('input', calcAndRender);
-
-});
