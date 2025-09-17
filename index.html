@@ -3,155 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <title>Concrete Bid Calculator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#2563eb" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root { --pad: 14px; --gap: 12px; --brand: #2563eb; --text: #1f2937; --muted: #6b7280; }
-    * { box-sizing: border-box; }
-    body {
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      margin: 0; padding: 16px; color: var(--text); background: #f8fafc;
-    }
-    header { max-width: 760px; margin: 0 auto 12px; }
-    h1 { margin: 0 0 6px; font-size: 1.4rem; }
-    .muted { color: var(--muted); font-size: 0.95rem; }
-
-    .container { max-width: 760px; margin: 0 auto; }
-
-    .card {
-      background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: var(--pad);
-      box-shadow: 0 1px 2px rgba(0,0,0,.03); margin-top: 12px;
-    }
-
-    .inputs {
-      display: grid; grid-template-columns: 1fr; gap: var(--gap);
-    }
-    @media (min-width: 560px) {
-      .inputs { grid-template-columns: 1fr 1fr; }
-    }
-    label { display: block; font-weight: 600; margin-bottom: 6px; }
-    input {
-      width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 16px;
-      background: #fff;
-    }
-    input:focus { outline: 2px solid #bfdbfe; border-color: #93c5fd; }
-    .actions {
-      display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;
-    }
-    button {
-      appearance: none; border: none; padding: 12px 16px; border-radius: 10px; font-size: 16px;
-      background: var(--brand); color: #fff; font-weight: 700; letter-spacing: .2px; width: 100%;
-    }
-    button:active { transform: translateY(1px); }
-    @media (min-width: 560px) {
-      button { width: auto; }
-    }
-
-    .grid {
-      display: grid; gap: var(--gap);
-    }
-    @media (min-width: 680px) {
-      .grid { grid-template-columns: 1fr 1fr; }
-    }
-
-    .row {
-      display: flex; justify-content: space-between; align-items: baseline;
-      padding: 8px 0; border-bottom: 1px dashed #eef2f7;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+    h1 { margin-bottom: 0.5rem; }
+    label { display: block; margin-top: 1rem; font-weight: bold; }
+    input[type="number"] { width: 100%; padding: 8px; margin-top: 4px; }
+    button { margin-top: 1rem; padding: 10px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    .toggle { margin-top: 1rem; }
+    .card { background: #f9f9f9; padding: 16px; margin-top: 20px; border-radius: 8px; border: 1px solid #ddd; }
+    .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #ccc; }
     .row:last-child { border-bottom: none; }
-    .label { color: var(--muted); }
-    .value { font-variant-numeric: tabular-nums; }
-
-    .totals { border: 2px solid #e2e8f0; }
-    .totals .row { padding: 10px 0; }
-    .strong { font-weight: 800; }
-
     .hidden { display: none; }
-
-    /* Make tap targets comfortable on iOS */
-    @supports (-webkit-touch-callout: none) {
-      input, button { font-size: 17px; } /* avoid zoom on focus */
-    }
+    ul { margin-top: 10px; padding-left: 20px; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Concrete Bid Calculator</h1>
-    <div class="muted">Enter square feet and thickness. Accurate rounding. Mobile-ready.</div>
-  </header>
+  <h1>Concrete Bid Calculator V.2</h1>
 
-  <main class="container">
-    <section class="card">
-      <div class="inputs">
-        <div>
-          <label for="sfInput">Square feet</label>
-          <input id="sfInput" type="number" inputmode="numeric" min="0" step="1" placeholder="e.g. 800" autocomplete="off" />
-        </div>
-        <div>
-          <label for="thicknessInput">Thickness (inches)</label>
-          <input id="thicknessInput" type="number" inputmode="decimal" min="0" step="0.25" placeholder="e.g. 4" autocomplete="off" />
-        </div>
-      </div>
-      <div class="actions">
-        <button id="calcBtn" type="button">Calculate</button>
-      </div>
-    </section>
+  <label for="sfInput">Square Feet</label>
+  <input type="number" id="sfInput" placeholder="e.g. 800" />
 
-    <div class="actions">
-  <button id="calcBtn" type="button">Calculate</button>
-</div>
+  <label for="thicknessInput">Thickness (inches)</label>
+  <input type="number" id="thicknessInput" placeholder="e.g. 4" />
 
-<label style="margin-top: 12px; display: block;">
-  <input type="checkbox" id="handoffToggle" />
-  Include Operational Handoff
-</label>
+  <button id="calcBtn">Calculate</button>
 
-    <section id="results" class="grid hidden" aria-live="polite">
-      <div class="card">
-        <h3>Soil removal</h3>
-        <div class="row"><div class="label">Cubic yards</div><div class="value" id="soilCY"></div></div>
-        <div class="row"><div class="label">Labor hours</div><div class="value" id="soilHrs"></div></div>
-        <div class="row"><div class="label">Cost</div><div class="value" id="soilCost"></div></div>
-        <div class="row"><div class="label">Price</div><div class="value" id="soilPrice"></div></div>
-      </div>
+  <label class="toggle">
+    <input type="checkbox" id="handoffToggle" />
+    Include Operational Handoff
+  </label>
 
-      <div class="card">
-        <h3>Road base</h3>
-        <div class="row"><div class="label">Design CY (placed)</div><div class="value" id="baseDesignCY"></div></div>
-        <div class="row"><div class="label">Loose CY (delivered, +20%)</div><div class="value" id="baseLooseCY"></div></div>
-        <div class="row"><div class="label">Material cost</div><div class="value" id="baseMat"></div></div>
-        <div class="row"><div class="label">Labor hours</div><div class="value" id="baseHrs"></div></div>
-        <div class="row"><div class="label">Labor cost</div><div class="value" id="baseLabor"></div></div>
-        <div class="row"><div class="label">Compactor rental</div><div class="value" id="baseComp"></div></div>
-        <div class="row"><div class="label">Cost</div><div class="value" id="baseCost"></div></div>
-        <div class="row"><div class="label">Price</div><div class="value" id="basePrice"></div></div>
-      </div>
+  <div id="results" class="card hidden">
+    <h2>Bid Summary</h2>
+    <div class="row"><div>Soil Price</div><div id="soilPrice"></div></div>
+    <div class="row"><div>Road Base Price</div><div id="basePrice"></div></div>
+    <div class="row"><div>Concrete Price</div><div id="cretePrice"></div></div>
+    <div class="row"><strong>Total Price</strong><strong id="totPrice"></strong></div>
+  </div>
 
-      <div class="card">
-        <h3>Concrete</h3>
-        <div class="row"><div class="label">Design CY</div><div class="value" id="creteDesignCY"></div></div>
-        <div class="row"><div class="label">Ordered CY (+20%)</div><div class="value" id="creteOrderedCY"></div></div>
-        <div class="row"><div class="label">Material cost</div><div class="value" id="creteMat"></div></div>
-        <div class="row"><div class="label">Flatwork</div><div class="value" id="creteFlat"></div></div>
-        <div class="row"><div class="label">Cost</div><div class="value" id="creteCost"></div></div>
-        <div class="row"><div class="label">Price</div><div class="value" id="cretePrice"></div></div>
-      </div>
-
-      <div class="card totals">
-        <h3>Totals</h3>
-        <div class="row"><div class="label strong">Total cost</div><div class="value strong" id="totCost"></div></div>
-        <div class="row"><div class="label strong">Total price</div><div class="value strong" id="totPrice"></div></div>
-      </div>
-    </section>
-
-    <section id="handoff" class="card hidden" aria-live="polite">
-  <!-- This will be filled by JS -->
-</section>
-    
-  </main>
+  <div id="handoff" class="card hidden"></div>
 
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
