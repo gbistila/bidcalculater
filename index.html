@@ -148,6 +148,42 @@
       const concreteLaborCost = concreteLaborHours * 48;
       const totalConcreteCost = concreteCost + concreteLaborCost;
       const totalConcretePrice = totalConcreteCost * 1.43;
+      
+      <h3>Concrete details</h3>
+<label>Slab area (sq ft):</label>
+<input type="number" id="slabArea" class="input" />
+
+<label>Slab thickness (in):</label>
+<input type="number" id="thickness" class="input" />
+
+<label>Excavation depth to subgrade (in):</label>
+<input type="number" id="excavDepthIn" class="input" value="6" />
+
+<label>Roadbase depth (in):</label>
+<input type="number" id="baseDepthIn" class="input" value="4" />
+
+<h4>Rates and densities (optional)</h4>
+<label>Concrete material rate ($/yd³):</label>
+<input type="number" id="concreteRate" class="input" value="135" />
+
+<label>Roadbase material rate ($/ton):</label>
+<input type="number" id="baseRatePerTon" class="input" value="28" />
+
+<label>Soil haul-off rate ($/ton):</label>
+<input type="number" id="haulRatePerTon" class="input" value="18" />
+
+<label>Labor rate ($/hr):</label>
+<input type="number" id="laborRate" class="input" value="48" />
+
+<label>Roadbase density (tons/yd³):</label>
+<input type="number" id="baseDensityTonsPerYd" class="input" value="1.50" step="0.01" />
+
+<label>Soil density (tons/yd³):</label>
+<input type="number" id="soilDensityTonsPerYd" class="input" value="1.20" step="0.01" />
+
+<label>Markup multiplier:</label>
+<input type="number" id="markup" class="input" value="1.43" step="0.01" />
+
 
       // Combined
       const totalCost = totalWallCost + totalConcreteCost;
