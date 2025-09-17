@@ -1,63 +1,56 @@
+function round(value) {
+  return Math.round(value * 100) / 100;
+}
+
 function calculateBid(sf, thicknessInches) {
   const markup = 1.43;
 
-  // Convert to cubic yards
+  // Base volume
   const cy = (sf * thicknessInches) / 324;
 
   // --- Soil Removal ---
   const soilLaborHours = cy * 0.6;
-  const soilLaborRate = 48;
-  const soilCost = soilLaborHours * soilLaborRate;
-  const soilPrice = soilCost * markup;
+  const soilCost = round(soilLaborHours * 48);
+  const soilPrice = round(soilCost * markup);
 
   // --- Road Base ---
-  const roadCompactionFactor = 1.2;
-  const roadLooseCY = cy * roadCompactionFactor;
-  const roadMaterialRate = 35;
-  const roadLaborRate = 48;
-  const roadLaborHours = roadLooseCY * 1.0;
-  const roadMaterialCost = roadLooseCY * roadMaterialRate;
-  const roadLaborCost = roadLaborHours * roadLaborRate;
+  const roadLooseCY = cy * 1.2;
+  const roadMaterialCost = round(roadLooseCY * 35);
+  const roadLaborCost = round(roadLooseCY * 48);
   const compactorRental = 250;
-  const roadCost = roadMaterialCost + roadLaborCost + compactorRental;
-  const roadPrice = roadCost * markup;
+  const roadCost = round(roadMaterialCost + roadLaborCost + compactorRental);
+  const roadPrice = round(roadCost * markup);
 
   // --- Concrete ---
-  const concreteWasteFactor = 1.2;
-  const concreteOrderedCY = cy * concreteWasteFactor;
-  const concreteMaterialRate = 225;
-  const concreteFlatworkRate = 1.75;
-  const concreteFlatworkMax = 1500;
-  const concreteMaterialCost = concreteOrderedCY * concreteMaterialRate;
-  const concreteFlatworkCost = Math.max(concreteFlatworkMax, sf * concreteFlatworkRate);
-  const concreteCost = concreteMaterialCost + concreteFlatworkCost;
-  const concretePrice = concreteCost * markup;
+  const concreteOrderedCY = cy * 1.2;
+  const concreteMaterialCost = round(concreteOrderedCY * 225);
+  const concreteFlatworkCost = round(Math.max(1500, sf * 1.75));
+  const concreteCost = round(concreteMaterialCost + concreteFlatworkCost);
+  const concretePrice = round(concreteCost * markup);
 
   // --- Totals ---
-  const totalCost = soilCost + roadCost + concreteCost;
-  const totalPrice = soilPrice + roadPrice + concretePrice;
+  const totalCost = round(soilCost + roadCost + concreteCost);
+  const totalPrice = round(soilPrice + roadPrice + concretePrice);
 
   return {
     input: { squareFeet: sf, thickness: thicknessInches },
     soil: {
-      cubicYards: cy,
-      laborHours: soilLaborHours,
+      cubicYards: round(cy),
+      laborHours: round(soilLaborHours),
       cost: soilCost,
       price: soilPrice
     },
     roadBase: {
-      designCY: cy,
-      looseCY: roadLooseCY,
+      designCY: round(cy),
+      looseCY: round(roadLooseCY),
       materialCost: roadMaterialCost,
-      laborHours: roadLaborHours,
       laborCost: roadLaborCost,
       compactorRental,
       cost: roadCost,
       price: roadPrice
     },
     concrete: {
-      designCY: cy,
-      orderedCY: concreteOrderedCY,
+      orderedCY: round(concreteOrderedCY),
       materialCost: concreteMaterialCost,
       flatworkCost: concreteFlatworkCost,
       cost: concreteCost,
@@ -68,4 +61,15 @@ function calculateBid(sf, thicknessInches) {
       price: totalPrice
     }
   };
+}
+
+function runCalc() {
+  const sf = parseFloat(document.getElementById('sfInput').value);
+  const thickness = parseFloat(document.getElementById('thicknessInput').value);
+  if (isNaN(sf) || isNaN(thickness)) {
+    document.getElementById('output').textContent = "Please enter valid numbers.";
+    return;
+  }
+  const result = calculateBid(sf, thickness);
+  document.getElementById('output').textContent = JSON.stringify(result, null, 2);
 }
