@@ -1,114 +1,56 @@
-const toCents = (value) => Math.round(Number(value) * 100);
-const centsMul = (cents, factor) => Math.round(cents * Number(factor));
-const money = (cents) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
-const round = (val) => Math.round(val * 100) / 100;
+function calculateBid() {
+  // Inputs
+  const length = parseFloat(document.getElementById('length').value) || 0;
+  const height = parseFloat(document.getElementById('height').value) || 0;
+  const fillYards = parseFloat(document.getElementById('fillYards').value) || 0;
+  const slabArea = parseFloat(document.getElementById('slabArea').value) || 0;
+  const thickness = parseFloat(document.getElementById('thickness').value) || 0;
 
-function calculateBid(sf, thicknessInches) {
-  const markup = 1.43;
-  const laborRate = 48;
-  const baseMaterialRate = 35;
-  const compactorRentalC = toCents(250);
-  const concreteMaterialRate = 225;
-  const flatworkRate = 1.75;
-  const flatworkMin = 1500;
-  const roadCompaction = 1.2;
-  const concreteWaste = 1.2;
+  // Retaining Wall Calculations
+  const squareFootage = length * height;
+  const tons = squareFootage / 8;
+  const boulderCost = tons * 75;
+  const fillCost = fillYards * 15;
+  const laborHoursWall = tons + fillYards;
+  const laborCostWall = laborHoursWall * 48;
+  const totalWallCost = boulderCost + fillCost + laborCostWall;
+  const totalWallPrice = totalWallCost * 1.43;
 
-  const cy = (sf * thicknessInches) / 324;
+  // Concrete Calculations
+  const thicknessFeet = thickness / 12;
+  const concreteYards = (slabArea * thicknessFeet) / 27;
+  const concreteCost = concreteYards * 135;
+  const laborHoursConcrete = concreteYards * 1.5;
+  const laborCostConcrete = laborHoursConcrete * 48;
+  const totalConcreteCost = concreteCost + laborCostConcrete;
+  const totalConcretePrice = totalConcreteCost * 1.43;
 
-  const soilLaborHours = cy * 0.6;
-  const soilCostC = toCents(soilLaborHours * laborRate);
-  const soilPriceC = centsMul(soilCostC, markup);
+  // Combined Totals
+  const totalCost = totalWallCost + totalConcreteCost;
+  const totalPrice = totalWallPrice + totalConcretePrice;
 
-  const baseDesignCY = cy;
-  const baseLooseCY = baseDesignCY * roadCompaction;
-  const baseMaterialCostC = toCents(baseLooseCY * baseMaterialRate);
-  const baseLaborHours = baseLooseCY * 1.0;
-  const baseLaborCostC = toCents(baseLaborHours * laborRate);
-  const baseCostC = baseMaterialCostC + baseLaborCostC + compactorRentalC;
-  const basePriceC = centsMul(baseCostC, markup);
-
-  const creteDesignCY = cy;
-  const creteOrderedCY = creteDesignCY * concreteWaste;
-  const creteMaterialCostC = toCents(creteOrderedCY * concreteMaterialRate);
-  const creteFlatworkC = Math.max(toCents(flatworkMin), toCents(sf * flatworkRate));
-  const creteCostC = creteMaterialCostC + creteFlatworkC;
-  const cretePriceC = centsMul(creteCostC, markup);
-
-  const totalPriceC = soilPriceC + basePriceC + cretePriceC;
-
-  return {
-    soil: { priceC: soilPriceC },
-    roadBase: { priceC: basePriceC, looseCY: round(baseLooseCY) },
-    concrete: { priceC: cretePriceC, orderedCY: round(creteOrderedCY), equipment: ["Screed", "Bull float", "Mixer"] },
-    totals: { priceC: totalPriceC },
-    handoff: {
-      roadBase: {
-        material: "Road base",
-        looseCY: round(baseLooseCY),
-        notes: "Compactor on site. Drop at east pad."
-      },
-      concrete: {
-        material: "Concrete",
-        orderedCY: round(creteOrderedCY),
-        flatworkCap: "$1,500",
-        equipment: ["Screed", "Bull float", "Mixer"]
-      },
-      installPrep: {
-        totalLaborHours: round(soilLaborHours + baseLaborHours),
-        siteNotes: "Level pad. Access via west gate."
-      },
-      checklist: [
-        "Stakes and stringline set",
-        "Subgrade compacted",
-        "Forms placed and braced",
-        "Rebar or mesh installed",
-        "Mix confirmed with supplier",
-        "Water access available",
-        "Finish tools on site"
-      ]
-    }
-  };
+  // Output
+  document.getElementById('results').innerHTML = `
+    <h3>📊 Bid Summary</h3>
+    <p><strong>Retaining Wall:</strong></p>
+    <p>Square Footage: ${squareFootage.toFixed(2)} ft²</p>
+    <p>Tons of Boulders: ${tons.toFixed(2)} tons</p>
+    <p>Boulder Cost: $${boulderCost.toFixed(2)}</p>
+    <p>Fill Dirt Cost: $${fillCost.toFixed(2)}</p>
+    <p>Labor Hours: ${laborHoursWall.toFixed(2)} hrs</p>
+    <p>Labor Cost: $${laborCostWall.toFixed(2)}</p>
+    <p>Total Wall Cost: $${totalWallCost.toFixed(2)}</p>
+    <p>Total Wall Price: $${totalWallPrice.toFixed(2)}</p>
+    <hr />
+    <p><strong>Concrete:</strong></p>
+    <p>Concrete Yards: ${concreteYards.toFixed(2)} yd³</p>
+    <p>Concrete Cost: $${concreteCost.toFixed(2)}</p>
+    <p>Labor Hours: ${laborHoursConcrete.toFixed(2)} hrs</p>
+    <p>Labor Cost: $${laborCostConcrete.toFixed(2)}</p>
+    <p>Total Concrete Cost: $${totalConcreteCost.toFixed(2)}</p>
+    <p>Total Concrete Price: $${totalConcretePrice.toFixed(2)}</p>
+    <hr />
+    <p><strong>Grand Total Cost:</strong> $${totalCost.toFixed(2)}</p>
+    <p><strong>Grand Total Price:</strong> $${totalPrice.toFixed(2)}</p>
+  `;
 }
-
-function render(result) {
-  document.getElementById('results').classList.remove('hidden');
-  document.getElementById('soilPrice').textContent = money(result.soil.priceC);
-  document.getElementById('basePrice').textContent = money(result.roadBase.priceC);
-  document.getElementById('cretePrice').textContent = money(result.concrete.priceC);
-  document.getElementById('totPrice').textContent = money(result.totals.priceC);
-
-  const handoffEl = document.getElementById('handoff');
-  if (document.getElementById('handoffToggle').checked) {
-    handoffEl.classList.remove('hidden');
-    handoffEl.innerHTML = `
-      <h2>Operational Handoff</h2>
-      <p><strong>Road Base:</strong> ${result.handoff.roadBase.looseCY} CY — ${result.handoff.roadBase.notes}</p>
-      <p><strong>Concrete:</strong> ${result.handoff.concrete.orderedCY} CY — Equipment: ${result.handoff.concrete.equipment.join(", ")}</p>
-      <p><strong>Labor Hours:</strong> ${result.handoff.installPrep.totalLaborHours}</p>
-      <p><strong>Site Notes:</strong> ${result.handoff.installPrep.siteNotes}</p>
-      <ul>
-        ${result.handoff.checklist.map(item => `<li>${item}</li>`).join("")}
-      </ul>
-    `;
-  } else {
-    handoffEl.classList.add('hidden');
-  }
-}
-
-function calcAndRender() {
-  const sf = parseFloat(document.getElementById('sfInput').value);
-  const thickness = parseFloat(document.getElementById('thicknessInput').value);
-  if (!isFinite(sf) || !isFinite(thickness) || sf <= 0 || thickness <= 0) {
-    document.getElementById('results').classList.add('hidden');
-    document.getElementById('handoff').classList.add('hidden');
-    return;
-  }
-  const result = calculateBid(sf, thickness);
-  render(result);
-}
-
-document.getElementById('calcBtn').addEventListener('click', calcAndRender);
-document.getElementById('sfInput').addEventListener('input', calcAndRender);
-document.getElementById('thicknessInput').addEventListener('input', calcAndRender);
