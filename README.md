@@ -1,6 +1,6 @@
 # 🧱 Alpine Concrete Bid Calculator
 
-This lightweight web app calculates cost and client pricing for soil removal, road base, and concrete installation using square footage and thickness. Designed for Alpine Landscaping Utah field reps.
+This lightweight web app calculates cost and client pricing for soil removal, road base, and concrete installation using square footage and thickness. 
 
 ## 🔧 Features
 
