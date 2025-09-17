@@ -1,17 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Concrete Bid Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; max-width: 600px; margin: auto; }
+    label { display: block; margin-top: 1rem; }
+    input { width: 100%; padding: 0.5rem; margin-top: 0.25rem; }
+    button { margin-top: 1rem; padding: 0.5rem 1rem; }
+    pre { background: #f4f4f4; padding: 1rem; margin-top: 2rem; overflow-x: auto; }
+  </style>
 </head>
 <body>
   <h1>Concrete Bid Calculator</h1>
   <label>Square Feet:</label>
-  <input type="number" id="sfInput" /><br/>
+  <input type="number" id="sfInput" placeholder="e.g. 800" />
+
   <label>Thickness (inches):</label>
-  <input type="number" id="thicknessInput" /><br/>
+  <input type="number" id="thicknessInput" placeholder="e.g. 4" />
+
   <button onclick="runCalc()">Calculate</button>
+
   <pre id="output"></pre>
+
   <script src="script.js"></script>
 </body>
 </html>
