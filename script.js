@@ -64,7 +64,31 @@ function calculateBid(sf, thicknessInches) {
       materialCostC: creteMaterialCostC, flatworkC: creteFlatworkC, costC: creteCostC, priceC: cretePriceC
     },
     totals: { costC: totalCostC, priceC: totalPriceC }
-  };
+handoff: {
+  roadBase: {
+    material: "Road base",
+    looseCY: round(baseLooseCY),
+    notes: "Compactor on site. Drop at east pad."
+  },
+  concrete: {
+    material: "Concrete",
+    orderedCY: round(creteOrderedCY),
+    flatworkCap: "$1,500",
+    equipment: ["Screed", "Bull float", "Mixer"]
+  },
+  installPrep: {
+    totalLaborHours: round(soilLaborHours + baseLaborHours),
+    siteNotes: "Level pad. Access via west gate."
+  },
+  checklist: [
+    "Stakes and stringline set",
+    "Subgrade compacted",
+    "Forms placed and braced",
+    "Rebar or mesh installed",
+    "Mix confirmed with supplier",
+    "Water access available",
+    "Finish tools on site"
+  ]
 }
 
 // ---- UI wiring ----
@@ -98,6 +122,22 @@ function render(result) {
   // Totals
   show('totCost', money(result.totals.costC));
   show('totPrice', money(result.totals.priceC));
+}
+const handoffEl = document.getElementById('handoff');
+if (document.getElementById('handoffToggle').checked) {
+  handoffEl.classList.remove('hidden');
+  handoffEl.innerHTML = `
+    <h3>Operational Handoff</h3>
+    <p><strong>Road Base:</strong> ${result.handoff.roadBase.looseCY} CY — ${result.handoff.roadBase.notes}</p>
+    <p><strong>Concrete:</strong> ${result.handoff.concrete.orderedCY} CY — Equipment: ${result.handoff.concrete.equipment.join(", ")}</p>
+    <p><strong>Labor Hours:</strong> ${result.handoff.installPrep.totalLaborHours}</p>
+    <p><strong>Site Notes:</strong> ${result.handoff.installPrep.siteNotes}</p>
+    <ul>
+      ${result.handoff.checklist.map(item => `<li>${item}</li>`).join("")}
+    </ul>
+  `;
+} else {
+  handoffEl.classList.add('hidden');
 }
 
 function calcAndRender() {
