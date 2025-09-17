@@ -110,16 +110,9 @@ function calcAndRender() {
   render(result);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const sfEl = document.getElementById('sfInput');
-  const thEl = document.getElementById('thicknessInput');
-  const btn = document.getElementById('calcBtn');
+// --- Button and input wiring (runs immediately after DOM loads) ---
+document.getElementById('calcBtn').addEventListener('click', calcAndRender);
+document.getElementById('sfInput').addEventListener('input', calcAndRender);
+document.getElementById('thicknessInput').addEventListener('input', calcAndRender);
 
-  // Button works reliably on all browsers
-  btn.addEventListener('click', calcAndRender);
-
-  // Also calculate as they type/change (mobile-friendly)
-  const onChange = () => calcAndRender();
-  sfEl.addEventListener('input', onChange);
-  thEl.addEventListener('input', onChange);
 });
