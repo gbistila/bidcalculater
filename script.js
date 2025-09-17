@@ -81,20 +81,29 @@ function render(result) {
 
   const handoffEl = document.getElementById('handoff');
   if (document.getElementById('handoffToggle').checked) {
-    handoffEl.classList.remove('hidden');
-    handoffEl.innerHTML = `
-      <h2>Operational Handoff</h2>
-      <p><strong>Road Base:</strong> ${result.handoff.roadBase.looseCY} CY — ${result.handoff.roadBase.notes}</p>
-      <p><strong>Concrete:</strong> ${result.handoff.concrete.orderedCY} CY — Equipment: ${result.handoff.concrete.equipment.join(", ")}</p>
-      <p><strong>Labor Hours:</strong> ${result.handoff.installPrep.totalLaborHours}</p>
-      <p><strong>Site Notes:</strong> ${result.handoff.installPrep.siteNotes}</p>
-      <ul>
-        ${result.handoff.checklist.map(item => `<li>${item}</li>`).join("")}
-      </ul>
-    `;
-  } else {
-    handoffEl.classList.add('hidden');
-  }
+  const thickness = document.getElementById('thicknessInput').value;
+  const labor = result.handoff.installPrep.totalLaborHours;
+  const roadCY = result.handoff.roadBase.looseCY;
+  const designCY = round(result.concrete.designCY);
+  const orderedCY = round(result.concrete.orderedCY);
+  const budgetCents = toCents(orderedCY * 225);
+  const budgetTotal = centsMul(budgetCents, 1.43);
+  const budget = money(budgetTotal);
+
+  handoffEl.classList.remove('hidden');
+  handoffEl.innerHTML = `
+    <h2>Operational Handoff</h2>
+    <pre style="white-space: pre-wrap; font-size: 1rem;">
+Concrete Installation:
+- ${labor} labor hours
+- ${roadCY} yards road base at ${thickness} inches thick
+- ${designCY} yards concrete (${orderedCY} ordered — ${budget} budget)
+    </pre>
+  `;
+} else {
+  handoffEl.classList.add('hidden');
+}
+
 }
 
 function calcAndRender() {
