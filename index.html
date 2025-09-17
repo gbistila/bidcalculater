@@ -2,49 +2,181 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Concrete Bid Calculator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alpine's Field Calculator</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; }
-    h1 { margin-bottom: 0.5rem; }
-    label { display: block; margin-top: 1rem; font-weight: bold; }
-    input[type="number"] { width: 100%; padding: 8px; margin-top: 4px; }
-    button { margin-top: 1rem; padding: 10px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    button:hover { background: #1d4ed8; }
-    .toggle { margin-top: 1rem; }
-    .card { background: #f9f9f9; padding: 16px; margin-top: 20px; border-radius: 8px; border: 1px solid #ddd; }
-    .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #ccc; }
-    .row:last-child { border-bottom: none; }
-    .hidden { display: none; }
-    ul { margin-top: 10px; padding-left: 20px; }
+    :root {
+      --alpine-blue: #4682B4;
+      --alpine-cyan: #B0E0E6;
+      --alpine-green: #2E8B57;
+      --alpine-white: #E0FFFF;
+      --text-dark: #1a1a1a;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Helvetica Neue', sans-serif;
+      background: var(--alpine-white);
+      color: var(--text-dark);
+      padding: 1rem;
+    }
+
+    header {
+      background: var(--alpine-blue);
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      border-radius: 0 0 12px 12px;
+    }
+
+    header img {
+      max-height: 80px;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    .content {
+      max-width: 600px;
+      margin: 1rem auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    .input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 1rem;
+      margin-top: 1.5rem;
+      background: var(--alpine-green);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #246b45;
+    }
+
+    .results {
+      margin-top: 1.5rem;
+      background: var(--alpine-cyan);
+      padding: 1rem;
+      border-radius: 12px;
+    }
+
+    .results p {
+      margin: 0.5rem 0;
+    }
   </style>
 </head>
 <body>
-  <h1>Concrete Bid Calculator V.2</h1>
+  <header>
+    <img src="alpine-logo.png" alt="Alpine Landscaping Logo" />
+    <h1>Alpine's Field Calculator</h1>
+  </header>
 
-  <label for="sfInput">Square Feet</label>
-  <input type="number" id="sfInput" placeholder="e.g. 800" />
+  <div class="content">
+    <h2>Retaining Wall Bid</h2>
+    <label>Length (ft):</label>
+    <input type="number" id="length" class="input" />
 
-  <label for="thicknessInput">Thickness (inches)</label>
-  <input type="number" id="thicknessInput" placeholder="e.g. 4" />
+    <label>Height (ft):</label>
+    <input type="number" id="height" class="input" />
 
-  <button id="calcBtn">Calculate</button>
+    <label>Fill Yards:</label>
+    <input type="number" id="fillYards" class="input" />
 
-  <label class="toggle">
-    <input type="checkbox" id="handoffToggle" />
-    Include Operational Handoff
-  </label>
+    <h2>Concrete Bid</h2>
+    <label>Slab Area (sq ft):</label>
+    <input type="number" id="slabArea" class="input" />
 
-  <div id="results" class="card hidden">
-    <h2>Bid Summary</h2>
-    <div class="row"><div>Soil Price</div><div id="soilPrice"></div></div>
-    <div class="row"><div>Road Base Price</div><div id="basePrice"></div></div>
-    <div class="row"><div>Concrete Price</div><div id="cretePrice"></div></div>
-    <div class="row"><strong>Total Price</strong><strong id="totPrice"></strong></div>
+    <label>Thickness (inches):</label>
+    <input type="number" id="thickness" class="input" />
+
+    <button class="btn" onclick="calculateBid()">Calculate Bid</button>
+
+    <div id="results" class="results"></div>
   </div>
 
-  <div id="handoff" class="card hidden"></div>
+  <script>
+    function calculateBid() {
+      const length = parseFloat(document.getElementById('length').value) || 0;
+      const height = parseFloat(document.getElementById('height').value) || 0;
+      const fillYards = parseFloat(document.getElementById('fillYards').value) || 0;
+      const slabArea = parseFloat(document.getElementById('slabArea').value) || 0;
+      const thickness = parseFloat(document.getElementById('thickness').value) || 0;
 
-  <script src="script.js"></script>
+      // Retaining Wall
+      const squareFootage = length * height;
+      const tons = squareFootage / 8;
+      const boulderCost = tons * 75;
+      const fillCost = fillYards * 15;
+      const laborHours = tons + fillYards;
+      const laborCost = laborHours * 48;
+      const totalWallCost = boulderCost + fillCost + laborCost;
+      const totalWallPrice = totalWallCost * 1.43;
+
+      // Concrete Bid
+      const thicknessFeet = thickness / 12;
+      const concreteYards = (slabArea * thicknessFeet) / 27;
+      const concreteCost = concreteYards * 135;
+      const concreteLaborHours = concreteYards * 1.5;
+      const concreteLaborCost = concreteLaborHours * 48;
+      const totalConcreteCost = concreteCost + concreteLaborCost;
+      const totalConcretePrice = totalConcreteCost * 1.43;
+
+      // Combined
+      const totalCost = totalWallCost + totalConcreteCost;
+      const totalPrice = totalWallPrice + totalConcretePrice;
+
+      document.getElementById('results').innerHTML = `
+        <h3>📊 Bid Summary</h3>
+        <p><strong>Retaining Wall:</strong></p>
+        <p>Square Footage: ${squareFootage.toFixed(2)} ft²</p>
+        <p>Tons of Boulders: ${tons.toFixed(2)} tons</p>
+        <p>Boulder Cost: $${boulderCost.toFixed(2)}</p>
+        <p>Fill Dirt Cost: $${fillCost.toFixed(2)}</p>
+        <p>Labor Hours: ${laborHours.toFixed(2)} hrs</p>
+        <p>Labor Cost: $${laborCost.toFixed(2)}</p>
+        <p>Total Wall Cost: $${totalWallCost.toFixed(2)}</p>
+        <p>Total Wall Price: $${totalWallPrice.toFixed(2)}</p>
+        <hr />
+        <p><strong>Concrete:</strong></p>
+        <p>Concrete Yards: ${concreteYards.toFixed(2)} yd³</p>
+        <p>Concrete Cost: $${concreteCost.toFixed(2)}</p>
+        <p>Labor Hours: ${concreteLaborHours.toFixed(2)} hrs</p>
+        <p>Labor Cost: $${concreteLaborCost.toFixed(2)}</p>
+        <p>Total Concrete Cost: $${totalConcreteCost.toFixed(2)}</p>
+        <p>Total Concrete Price: $${totalConcretePrice.toFixed(2)}</p>
+        <hr />
+        <p><strong>Grand Total Cost:</strong> $${totalCost.toFixed(2)}</p>
+        <p><strong>Grand Total Price:</strong> $${totalPrice.toFixed(2)}</p>
+      `;
+    }
+  </script>
 </body>
 </html>
